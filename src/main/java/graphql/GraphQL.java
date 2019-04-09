@@ -521,7 +521,7 @@ public class GraphQL {
         if (parseResult.isFailure()) {
             log.warn("Query failed to parse : '{}'", executionInput.getQuery());
             return new PreparsedDocumentEntry(toInvalidSyntaxError(parseResult.getException()));
-        } else {
+        } else if(executionInput.isValidate()) {
             final Document document = parseResult.getDocument();
 
             log.debug("Validating query: '{}'", executionInput.getQuery());
@@ -533,6 +533,7 @@ public class GraphQL {
 
             return new PreparsedDocumentEntry(document);
         }
+        return new PreparsedDocumentEntry(parseResult.getDocument());
     }
 
     private ParseResult parse(ExecutionInput executionInput, GraphQLSchema graphQLSchema, InstrumentationState instrumentationState) {

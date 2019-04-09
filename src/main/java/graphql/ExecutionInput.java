@@ -19,20 +19,25 @@ public class ExecutionInput {
     private final Object root;
     private final Map<String, Object> variables;
     private final DataLoaderRegistry dataLoaderRegistry;
-
+    private final boolean validate;
 
     public ExecutionInput(String query, String operationName, Object context, Object root, Map<String, Object> variables) {
-        this(query, operationName, context, root, variables, new DataLoaderRegistry());
+        this(query, operationName, context, root, variables, true);
+    }
+
+    public ExecutionInput(String query, String operationName, Object context, Object root, Map<String, Object> variables,boolean validate) {
+        this(query, operationName, context, root, variables, new DataLoaderRegistry(), validate);
     }
 
     @Internal
-    private ExecutionInput(String query, String operationName, Object context, Object root, Map<String, Object> variables, DataLoaderRegistry dataLoaderRegistry) {
+    private ExecutionInput(String query, String operationName, Object context, Object root, Map<String, Object> variables, DataLoaderRegistry dataLoaderRegistry, boolean validate) {
         this.query = query;
         this.operationName = operationName;
         this.context = context;
         this.root = root;
         this.variables = variables;
         this.dataLoaderRegistry = dataLoaderRegistry;
+        this.validate=validate;
     }
 
     /**
@@ -78,6 +83,13 @@ public class ExecutionInput {
     }
 
     /**
+     * @return If the query validation should be performed. Default value is true
+     */
+    public boolean isValidate() {
+        return validate;
+    }
+
+    /**
      * This helps you transform the current ExecutionInput object into another one by starting a builder with all
      * the current values and allows you to transform it how you want.
      *
@@ -91,6 +103,7 @@ public class ExecutionInput {
                 .operationName(this.operationName)
                 .context(this.context)
                 .root(this.root)
+                .validate(this.validate)
                 .dataLoaderRegistry(this.dataLoaderRegistry)
                 .variables(this.variables);
 
@@ -127,6 +140,7 @@ public class ExecutionInput {
         private Object root;
         private Map<String, Object> variables = Collections.emptyMap();
         private DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
+        private boolean validate = true;
 
         public Builder query(String query) {
             this.query = query;
@@ -153,6 +167,11 @@ public class ExecutionInput {
             return this;
         }
 
+        public Builder validate(boolean validate) {
+            this.validate = validate;
+            return this;
+        }
+
         /**
          * You should create new {@link org.dataloader.DataLoaderRegistry}s and new {@link org.dataloader.DataLoader}s for each execution.  Do not re-use
          * instances as this will create unexpected results.
@@ -167,7 +186,7 @@ public class ExecutionInput {
         }
 
         public ExecutionInput build() {
-            return new ExecutionInput(query, operationName, context, root, variables, dataLoaderRegistry);
+            return new ExecutionInput(query, operationName, context, root, variables, dataLoaderRegistry,validate);
         }
     }
 }
